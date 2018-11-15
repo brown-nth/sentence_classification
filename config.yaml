@@ -1,0 +1,82 @@
+data:
+  dataset: {name: imdb, samples: 25000, type: public}
+  datasetLoadOption: batch
+  kfold: 1
+  mapping:
+    Review:
+      options: {Normalization: false, Scaling: 1}
+      port: InputPort0
+      shape: ''
+      type: Array
+    Sentiment:
+      options: {Normalization: false, Scaling: 1}
+      port: OutputPort0
+      shape: ''
+      type: Numeric
+  numPorts: 1
+  samples: {split: 1, test: 0, training: 20000, validation: 5000}
+  shuffle: true
+model:
+  connections:
+  - {source: Embedding_1, target: Convolution1D_1}
+  - {source: Dense_31266, target: Dense_31267}
+  - {source: Dropout_12698, target: Dense_31266}
+  - {source: Convolution1D_1, target: MaxPooling1D_1}
+  - {source: MaxPooling1D_1, target: Flatten_1}
+  - {source: Dense_31267, target: Output_4}
+  - {source: Flatten_1, target: Dropout_12698}
+  - {source: Input_4, target: Embedding_1}
+  layers:
+  - args: {}
+    class: Input
+    name: Input_4
+    x: 229
+    y: 102
+  - args: {dropout: '0.2', input_dim: '499', output_dim: '128'}
+    class: Embedding
+    name: Embedding_1
+    x: 223
+    y: 232
+  - args: {activation: relu, filter_length: '5', nb_filter: '50'}
+    class: Convolution1D
+    name: Convolution1D_1
+    x: 235
+    y: 355
+  - args: {}
+    class: MaxPooling1D
+    name: MaxPooling1D_1
+    x: 234
+    y: 482
+  - args: {}
+    class: Flatten
+    name: Flatten_1
+    x: 234
+    y: 626
+  - args: {p: '0.5'}
+    class: Dropout
+    name: Dropout_12698
+    x: 634
+    y: 106
+  - args: {activation: relu, output_dim: '10'}
+    class: Dense
+    name: Dense_31266
+    x: 641
+    y: 250
+  - args: {activation: sigmoid, output_dim: '1'}
+    class: Dense
+    name: Dense_31267
+    x: 642
+    y: 391
+  - args: {}
+    class: Output
+    name: Output_4
+    x: 637
+    y: 570
+params:
+  advance_params: true
+  batch_size: 32
+  is_custom_loss: false
+  loss_func: binary_crossentropy
+  num_epoch: 15
+  optimizer: {name: Adam}
+project: Sentence Classification
