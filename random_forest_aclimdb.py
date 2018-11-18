@@ -68,7 +68,7 @@ vectorizer = CountVectorizer(analyzer = "word",
                      preprocessor = None, 
                      stop_words = None,   
                      max_features = 5000)
-
+#dictionary = vectorizer.get_feature_names()
 
 train_review_clear = []
 for i in range(len(train_review_raw)):
@@ -88,7 +88,7 @@ end_load = time.time()
 print("Clean all data !")
 
 print("Take a while to compute model ...")
-forest = RandomForestClassifier(n_estimators = 100)
+forest = RandomForestClassifier(n_estimators = 200)
 #forest = forest.fit(train_data_features, train_data["sentiment"])
 
 forest = forest.fit(train_data_features, train_label)

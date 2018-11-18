@@ -61,19 +61,19 @@ all_review_clear = train_review_clear+ test_review_clear
 
 def cal_distribute_num_word(array_list_words):
     length = [len(array_list_words[i]) for i in range(len(array_list_words))]
-    mat = np.array(max(length))
+    mat = np.zeros(max(length))
     for i in range(len(length)):
         mat[length[i]-1] = mat[length[i]-1] + 1
+    return mat
 
 distr_words_test = cal_distribute_num_word(test_review_clear)
 distr_words_train = cal_distribute_num_word(train_review_clear)
 distr_words_all = cal_distribute_num_word(all_review_clear)
 
-max_sent_length = 0
-for i in range(len(all_review_clear)):
-    if(max_sent_length < len(all_review_clear[i])):
-        max_sent_length = len(all_review_clear[i])
-max_sent_length = 500
+max_sent_length = 100
+#for i in range(len(all_review_clear)):
+#    if(max_sent_length < len(all_review_clear[i])):
+#        max_sent_length = len(all_review_clear[i])
 
 for i in range(len(train_review_clear)):
     train_review_clear[i] = train_review_clear[i][:max_sent_length]
@@ -111,8 +111,6 @@ def build_dataset(data):
     return data_list, count , dictionary, reverse_dictionary
 
 review_index , count , dictionary , reverse_dictionary = build_dataset(all_review_clear)
-
-    
 graph = tf.Graph()
 filter_sizes = [3,5,7] 
 sent_length = max_sent_length
@@ -146,7 +144,7 @@ class BatchGenerator(object):
         global dictionary, all_labels
         
         # Numpy arrays holding input and label data
-        inputs = np.zeros((self.batch_size,sent_length,vocabulary_size),dtype=np.float32)
+        inputs = np.zeros((self.batch_size,sent_length,dictionary_size),dtype=np.float32)
         labels_ohe = np.zeros((self.batch_size,num_classes),dtype=np.float32)
         
         # When we reach the end of the dataset
@@ -175,7 +173,7 @@ class BatchGenerator(object):
         return self.data_index
 
 # Test our batch generator
-sample_gen = BatchGenerator(batch_size,train_questions,train_labels)
+sample_gen = BatchGenerator(batch_size,train_review_clear,train_data_raw["sentiment"])
 # Generate a single batch
 sample_batch_inputs,sample_batch_labels = sample_gen.generate_batch()
 # Generate another batch
