@@ -63,6 +63,7 @@ def preprocess_review( review_text, remove_stopwords=False ):
 
         return(" ".join(words_lemma))
     
+
 vectorizer = CountVectorizer(analyzer = "word",   
                      tokenizer = None,    
                      preprocessor = None, 
@@ -94,7 +95,7 @@ forest = RandomForestClassifier(n_estimators = 200)
 forest = forest.fit(train_data_features, train_label)
 result = forest.predict(test_data_features)
 output = pd.DataFrame( data={"id":test_data["id"], "sentiment":result} )
-output.to_csv(os.path.join(os.path.dirname(__file__), 'data', 'Bag_of_Words_model.csv'), index=False, quoting=3)
+output.to_csv(os.path.join(os.path.dirname(__file__), 'data','result','Bag_of_Words_model.csv'), index=False, quoting=3)
 
 end_model = time.time()
 print("Done !")

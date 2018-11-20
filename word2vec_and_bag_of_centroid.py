@@ -36,7 +36,6 @@ print("Review : ", train_data["review"][0])
 
 begin_load = time.time()
 
-
 def preprocess_review( review_text, remove_stopwords=False ):
         # 1. Remove HTML
         review_text = BeautifulSoup(review_text,features="html5lib").get_text()
@@ -56,13 +55,17 @@ def preprocess_review( review_text, remove_stopwords=False ):
         for sent in sent_tokens:
             sentences.append(sent.split())
         return sentences
-        
+      
+    
 sentences = []
 labeled_train_review_raw = train_data["review"]
 unlabeled_train_review_raw = unlabeled_train_data["review"]
 test_review_raw = test_data["review"] 
 test_review_clean = []
 train_review_clean = []
+
+begin_preprocess_data = time.time()
+
 
 for review in labeled_train_review_raw:
     sentences.extend(preprocess_review(review, False))
@@ -76,7 +79,8 @@ for review in test_review_raw:
 #len(sentences) = 75000
 #sentences : [["this", "is" ,... "cat."],....]
 #len(train_review_clean) = 25000 , same as sentences but review not a sentence
-    
+end_preprocess_data = time.time()
+
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',\
     level=logging.INFO)
@@ -98,8 +102,9 @@ model.save(model_name)
 end_train_word2vec = time.time()
     
 #model = Word2Vec.load("300features_40minwords_10context")
-
+begin_cluster = time.time()
 word_vectors = model.wv.syn0
+
 num_clusters = int(word_vectors.shape[0] / 5)
 kmeans_clustering = KMeans( n_clusters = num_clusters )
 idx = kmeans_clustering.fit_predict( word_vectors )
@@ -116,6 +121,9 @@ def bag_of_centroid(review, word_centroid_map):
 train_centroids = [bag_of_centroid(review, word_centroid_map) for review in train_review_clean]
 test_centroids = [bag_of_centroid(review, word_centroid_map) for review in test_review_clean]
 
+end_cluster = time.time()
+
+
 forest = RandomForestClassifier(n_estimators = 100)
 print("Fitting a random forest to labeled training data...")
 begin_random_forest = time.time()
@@ -129,6 +137,8 @@ output.to_csv( "BagOfCentroids.csv", index=False, quoting=3 )
 end = time.time()
 
 print("Save file , done! ")
+print("Time to preprocess data: ", end_preprocess_data - begin_preprocess_data)
 print("Time to train word2vec :", end_train_word2vec - begin_train_word2vec)
 print("Time to train random forest: ", end_random_forest - begin_random_forest)
+print("Time to train KMean: ", end_cluster - begin_cluster)
 print("All time: ", end - begin)
