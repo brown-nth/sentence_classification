@@ -20,6 +20,7 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem import PorterStemmer,WordNetLemmatizer
 import time
 import logging
+import pickle
 
 
 from gensim.models import word2vec, Word2Vec
@@ -149,5 +150,10 @@ print("Time to preprocess data: ", end_preprocess_data - begin_preprocess_data)
 print("Time to train word2vec :", end_train_word2vec - begin_train_word2vec)
 print("Time to train random forest: ", end_random_forest - begin_random_forest)
 print("All time : ", end - begin)
+save_model = pickle.dumps(forest)
+pd.to_pickle(forest,"data/word2vect_and_mean_feature.pickle")
+print("Save !")
+model = pd.read_pickle("data/word2vect_and_mean_feature.pickle")
+#model.predict
 
 
