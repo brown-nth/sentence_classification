@@ -5,7 +5,8 @@
 RANDOM FORESTS ALGORITHM
 
 1) Dữ liệu : 
-Bộ dữ liệu review phim từ trang IMDB 
+Bộ dữ liệu review phim từ trang IMDB
+
 Kết quả lấy từ cuộc thi :
 	https://www.kaggle.com/c/word2vec-nlp-tutorial
 2) Xử lý dữ liệu : 
