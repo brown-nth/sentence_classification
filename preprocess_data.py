@@ -3,13 +3,16 @@ import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 import re
+#import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem import WordNetLemmatizer
 import time
 import logging
 from gensim.models import word2vec
-
+#nltk.download('punkt')
+#import nltk
+#nltk.download('stopwords')
 
 
 def preprocess_review( review_text, remove_stopwords=False ):
@@ -95,7 +98,7 @@ del test_data
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s',
                     level=logging.INFO)
-num_features = 100    # Word vector dimensionality                      
+num_features = 80    # Word vector dimensionality                      
 min_word_count = 40   # Minimum word count                        
 num_workers = 4       # Number of threads to run in parallel
 context = 10          # Context window size                                                                                    
@@ -111,7 +114,7 @@ del sentences
 # If you don't plan to train the model any further, calling 
 # init_sims will make the model much more memory-efficient.
 model.init_sims(replace=True)
-model_name = "300features_40minwords_10context"
+model_name = str(num_features) + "features_40minwords_10context"
 model.save(model_name)
 end_train_word2vec = time.time()
     
@@ -134,9 +137,9 @@ def meanFeatureVect(words , model , num_features):
 
 
 
-
-max_sent_length = 200
-
+#
+max_sent_length = 100
+#
 for i in range(len(test_review_clean)):
     test_review_clean[i] = test_review_clean[i][:max_sent_length]
 test_review_vect = [featureVect(review, model, num_features) for review in test_review_clean]
@@ -144,22 +147,22 @@ del test_review_clean
 for i in range(len(test_review_vect)):
    if(max_sent_length-len(test_review_vect[i])):
        test_review_vect[i] = np.append(test_review_vect[i],[[0]*num_features]*(max_sent_length-len(test_review_vect[i])), axis = 0)
-print([len(test_review_vect[i]) for i in range(len(test_review_vect))])
-test_review_vect = np.array([np.array(i) for i in test_review_vect])
-print(test_review_vect.shape)
-#pd.to_pickle(test_review_vect, "data/test_review_vect.pickle")
-#del test_review_vect
+#print([len(test_review_vect[i]) for i in range(len(test_review_vect))])
+#test_review_vect = np.array([np.array(i) for i in test_review_vect])
+#print(test_review_vect.shape)
+pd.to_pickle(test_review_vect, "data/test_review_vect_"+str(max_sent_length)+".pickle")
+del test_review_vect
 ##
 ##
-#for i in range(len(train_review_clean)):
-#    train_review_clean[i] = train_review_clean[i][:max_sent_length]
-#train_review_vect = [featureVect(review, model, num_features) for review in train_review_clean]
-#del train_review_clean
-#for i in range(len(train_review_vect)):
-#   if(max_sent_length-len(train_review_vect[i])):
-#       train_review_vect[i] = np.append(train_review_vect[i],[[0]*num_features]*(max_sent_length-len(train_review_vect[i])), axis = 0)
-#pd.to_pickle(train_review_vect, "data/train_review_vect.pickle")
-#del train_review_vect
+for i in range(len(train_review_clean)):
+    train_review_clean[i] = train_review_clean[i][:max_sent_length]
+train_review_vect = [featureVect(review, model, num_features) for review in train_review_clean]
+del train_review_clean
+for i in range(len(train_review_vect)):
+   if(max_sent_length-len(train_review_vect[i])):
+       train_review_vect[i] = np.append(train_review_vect[i],[[0]*num_features]*(max_sent_length-len(train_review_vect[i])), axis = 0)
+pd.to_pickle(train_review_vect, "data/train_review_vect_"+str(max_sent_length)+".pickle")
+del train_review_vect
 
 
 
