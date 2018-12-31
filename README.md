@@ -85,7 +85,7 @@ context = 10
 downsampling = 1e-3
 	c) Mỗi review chỉ sử dụng 100 từ đầu tiên để đánh giá , nếu review không đủ 100 từ thì chèn vào các vector [0,0,....] cho đủ
 Mô hình:
-Coi mỗi review là một image với kích thước 100*80
+Coi mỗi review là một image với kích thước 100*80 
 Ta dùng 3 kernel với kích thước lần lượt 3*80, 5*80, 7*80 quét qua 
 Ở hidden layer thứ nhất dùng relu là activate function thu được 3 vector 1*k, sử dụng reduce_mean cho các vector đó rồi concat lại  , ở lớp  cuối sử dụng full_connected và  softmax_cross_entropy_with_logits_v2 để đưa ra phân loại 
 Sử dụng MomentumOptimizer với learning_rate=0.01 và momentum=0.9 để minimize loss function
@@ -94,4 +94,3 @@ Guide :
 Kết quả:
 	      - Chạy  đến khi nào loss ở training nhỏ hơn 0.2 thì dừng, thu được kết quả : 
 Accuracy : 82.36% 
-Source code: 
