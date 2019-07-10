@@ -63,81 +63,84 @@ print('Label', train_labels.shape)
 # BUILD GRAPH
 batch_size = 32
 graph = tf.Graph()
-with graph.as_default():
-  # Different filter sizes we use in a single convolution layer
-  filter_sizes = [3,5,7] 
-  # inputs and labels
-  tf_train_sents = tf.placeholder(shape=[batch_size,sent_length,num_features],dtype=tf.float32,name='sentence_inputs')
-  tf_train_labels = tf.placeholder(shape=[batch_size,num_classes],dtype=tf.float32,name='sentence_labels')
-  tf_test_sents =  tf.placeholder(shape=[num_test_data,sent_length,num_features],dtype=tf.float32,name='sentence_inputs')
+#with tf.device("/gpu:0"):  # Different filter sizes we use in a single convolution layer
 
-  # Weights of the first parallel layer
-  con_w1 = tf.Variable(tf.truncated_normal([filter_sizes[0],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_1')
-  con_b1 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_1')
-
-  # Weights of the second parallel layer
-  con_w2 = tf.Variable(tf.truncated_normal([filter_sizes[1],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_2')
-  con_b2 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_2')
-
-  # Weights of the third parallel layer
-  con_w3 = tf.Variable(tf.truncated_normal([filter_sizes[2],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_3')
-  con_b3 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_3')
-
-  # Fully connected layer
-  fc_w1 = tf.Variable(tf.truncated_normal([len(filter_sizes),num_classes],stddev=0.5,dtype=tf.float32),name='weights_fulcon_1')
-  fc_b1 = tf.Variable(tf.random_uniform([num_classes],0,0.01,dtype=tf.float32),name='bias_fulcon_1')
-
-  def model(data):
-
-    # Calculate the output for all the filters with a stride 1
-    # We use relu activation as the activation function
-    conv1 =tf.nn.conv1d(data,con_w1,stride=1,padding='SAME')
-    hidden1_1 = tf.nn.relu(conv1 + con_b1)
-    conv2 =tf.nn.conv1d(data,con_w2,stride=1,padding='SAME')
-    hidden1_2 = tf.nn.relu(conv2 + con_b2)
-    conv3 =tf.nn.conv1d(data,con_w3,stride=1,padding='SAME')
-    hidden1_3 = tf.nn.relu(conv3 + con_b3)
-   
-    # Pooling over time operation
-
-    # This is doing the max pooling. Thereare two options to do the max pooling
-    # 1. Use tf.nn.max_pool operation on a tensor made by concatenating h1_1,h1_2,h1_3 and converting that tensor to 4D
-    # (Because max_pool takes a tensor of rank >= 4 )
-    # 2. Do the max pooling separately for each filter output and combine them using tf.concat 
-    # (this is the one used in the code)
-
-    hidden2_1 = tf.reduce_mean(hidden1_1,axis=1)
-    hidden2_2 = tf.reduce_mean(hidden1_2,axis=1)
-    hidden2_3 = tf.reduce_mean(hidden1_3,axis=1)
-
-    hidden2 = tf.concat([hidden2_1,hidden2_2,hidden2_3],axis=1)
-    return tf.matmul(hidden2,fc_w1) + fc_b1
-
-  # Calculate the fully connected layer output (no activation)
-  # Note: since h2 is 2d [batch_size,number of parallel filters] 
-  # reshaping the output is not required as it usually do in CNNs
-  logits = model(tf_train_sents)
-  loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf_train_labels,logits=logits))
-
-  # Momentum Optimizer
-  optimizer = tf.train.MomentumOptimizer(learning_rate=0.01,momentum=0.9).minimize(loss)
-#   predictions = tf.nn.softmax(model(tf_test_sents))
-  predictions = tf.argmax(tf.nn.softmax(model(tf_test_sents)),axis=1)
-
+with tf.device('/cpu:0'):
+    
+    filter_sizes = [3,5,7] 
+    # inputs and labels
+    tf_train_sents = tf.placeholder(shape=[batch_size,sent_length,num_features],dtype=tf.float32,name='sentence_inputs')
+    tf_train_labels = tf.placeholder(shape=[batch_size,num_classes],dtype=tf.float32,name='sentence_labels')
+    tf_test_sents =tf.placeholder(shape=[num_test_data,sent_length,num_features],dtype=tf.float32,name='sentence_inputs')
+    
+    # Weights of the first parallel layer
+    con_w1 = tf.Variable(tf.truncated_normal([filter_sizes[0],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_1')
+    con_b1 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_1')
+    
+    # Weights of the second parallel layer
+    con_w2 = tf.Variable(tf.truncated_normal([filter_sizes[1],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_2')
+    con_b2 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_2')
+    
+    # Weights of the third parallel layer
+    con_w3 = tf.Variable(tf.truncated_normal([filter_sizes[2],num_features,1],stddev=0.02,dtype=tf.float32),name='weights_3')
+    con_b3 = tf.Variable(tf.random_uniform([1],0,0.01,dtype=tf.float32),name='bias_3')
+    
+    # Fully connected layer
+    fc_w1 = tf.Variable(tf.truncated_normal([len(filter_sizes),num_classes],stddev=0.5,dtype=tf.float32),name='weights_fulcon_1')
+    fc_b1 = tf.Variable(tf.random_uniform([num_classes],0,0.01,dtype=tf.float32),name='bias_fulcon_1')
+    
+    def model(data):
+        
+        # Calculate the output for all the filters with a stride 1
+        # We use relu activation as the activation function
+        conv1 =tf.nn.conv1d(data,con_w1,stride=1,padding='SAME')
+        hidden1_1 = tf.nn.relu(conv1 + con_b1)
+        conv2 =tf.nn.conv1d(data,con_w2,stride=1,padding='SAME')
+        hidden1_2 = tf.nn.relu(conv2 + con_b2)
+        conv3 =tf.nn.conv1d(data,con_w3,stride=1,padding='SAME')
+        hidden1_3 = tf.nn.relu(conv3 + con_b3)
+         
+        # Pooling over time operation
+        
+        # This is doing the max pooling. Thereare two options to do the max pooling
+        # 1. Use tf.nn.max_pool operation on a tensor made by concatenating h1_1,h1_2,h1_3 and converting that tensor to 4D
+        # (Because max_pool takes a tensor of rank >= 4 )
+        # 2. Do the max pooling separately for each filter output and combine them using tf.concat 
+        # (this is the one used in the code)
+        
+        hidden2_1 = tf.reduce_mean(hidden1_1,axis=1)
+        hidden2_2 = tf.reduce_mean(hidden1_2,axis=1)
+        hidden2_3 = tf.reduce_mean(hidden1_3,axis=1)
+        
+        hidden2 = tf.concat([hidden2_1,hidden2_2,hidden2_3],axis=1)
+        return tf.matmul(hidden2,fc_w1) + fc_b1
+    
+    # Calculate the fully connected layer output (no activation)
+    # Note: since h2 is 2d [batch_size,number of parallel filters] 
+    # reshaping the output is not required as it usually do in CNNs
+    logits = model(tf_train_sents)
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf_train_labels,logits=logits))
+    
+    # Momentum Optimizer
+    optimizer = tf.train.MomentumOptimizer(learning_rate=0.01,momentum=0.9).minimize(loss)
+    # predictions = tf.nn.softmax(model(tf_test_sents))
+    predictions = tf.argmax(tf.nn.softmax(model(tf_test_sents)),axis=1)
+    
+    saver = tf.train.Saver()
 
 
 # RUN SESSION
-num_steps = 4001
-with tf.Session(graph=graph) as session:
-  tf.initialize_all_variables().run()
+num_steps = 1000
+with tf.Session() as session:
+#  tf.initialize_all_variables().run()
+  tf.global_variables_initializer()
   print('Initialized')
   for step in range(num_steps):
     offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
     batch_data = train_review_vect[offset:(offset + batch_size), :, :]
     batch_labels = train_labels[offset:(offset + batch_size), :]
     feed_dict = {tf_train_sents : batch_data, tf_train_labels : batch_labels, tf_test_sents : test_review_vect}
-    _, l = session.run(
-      [optimizer, loss], feed_dict=feed_dict)
+    _, l = session.run([optimizer, loss], feed_dict=feed_dict)
     if (step % 50 == 0):
       print('Minibatch loss at step %d: %f' % (step, l))
     if(l < 0.2):
@@ -146,6 +149,10 @@ with tf.Session(graph=graph) as session:
   _, l,predictions = session.run(
       [optimizer, loss,predictions], feed_dict=feed_dict)
 
+saver_path = saver.save(session,"model",global_step = step)
+
+with tf.Session() as session:
+    saver.restore(session,"model)
 # SAVE RESULT
 del test_review_vect
 del train_review_vect

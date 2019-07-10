@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from bs4 import BeautifulSoup
 import re
-#import nltk
+import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -13,11 +13,11 @@ from gensim.models import word2vec
 #nltk.download('punkt')
 #import nltk
 #nltk.download('stopwords')
-
-
+#
+#nltk.download('wordnet')
 def preprocess_review( review_text, remove_stopwords=False ):
         # 1. Remove HTML
-        review_text = BeautifulSoup(review_text,features="html5lib").get_text()
+        review_text = BeautifulSoup(review_text,features="html.parser").get_text()
         #
         review_text = review_text.lower()
 
