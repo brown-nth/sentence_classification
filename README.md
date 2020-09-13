@@ -1,6 +1,6 @@
 # sentence_classification
                                                        
-                                                       SENTENCE CLASSIFICATION 
+                                            SENTENCE CLASSIFICATION 
 
 RANDOM FORESTS ALGORITHM
 
@@ -8,7 +8,9 @@ RANDOM FORESTS ALGORITHM
 Bộ dữ liệu review phim từ trang IMDB
 
 Kết quả lấy từ cuộc thi :
+
 	https://www.kaggle.com/c/word2vec-nlp-tutorial
+
 2) Xử lý dữ liệu : 
 
 a) Sử dụng thư viện nltk để xử lý văn bản thô : 
@@ -36,6 +38,7 @@ C2 : Sử dụng thư viện sklearn.cluster.KMeans với n_clusters bằng . M�
 
 
 3) Xây dựng RandomForestClassifier từ thư viện sklearn.ensemble:
+
 Dựng model với số cây n_estimators = 100
 Fit model bằng các vector của từng review được tính ở trên 
 Predict tập test rồi tiến hành xuất ra file .csv 
@@ -77,14 +80,18 @@ a) Sử dụng thư viện nltk để xử lý văn bản thô :
 - Thư viện re để loại các ký tự không phải chữ viết 
 - Loại bỏ các stop word (trong tiếng anh ) như : a , an ,the , …
 -  Sử dụng WordNetLemmatizer để nhóm các từ cùng nghĩa : programmer,    programming , ... --> program
-b) Sử dụng gensim để dựng mô hình word2vec từ các câu trong tập     labeled_train_data và unlabeled_train_data . 
+
+b) Sử dụng gensim để dựng mô hình word2vec từ các câu trong tập labeled_train_data và unlabeled_train_data . 
+
 Chọn các hyperparameter :
 num_features = 80 (do giới hạn bộ nhớ trong mô hình)                       
 min_word_count = 40                       
 num_workers = 4       
 context = 10                                                                                             
 downsampling = 1e-3
-	c) Mỗi review chỉ sử dụng 100 từ đầu tiên để đánh giá , nếu review không đủ 100 từ thì chèn vào các vector [0,0,....] cho đủ
+
+c) Mỗi review chỉ sử dụng 100 từ đầu tiên để đánh giá , nếu review không đủ 100 từ thì chèn vào các vector [0,0,....] cho đủ
+	
 Mô hình:
 Coi mỗi review là một image với kích thước 100*80 
 Ta dùng 3 kernel với kích thước lần lượt 3*80, 5*80, 7*80 quét qua 
